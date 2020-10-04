@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "898545693773",
+    "firebase_url": "https://ictproject-1231a.firebaseio.com",
+    "project_id": "ictproject-1231a",
+    "storage_bucket": "ictproject-1231a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898545693773:android:a61a432175ba20f3d81804",
+        "android_client_info": {
+          "package_name": "com.example.ictproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "898545693773-h9lq9h8dnsp6kndtd7mq6c85ii1u40h2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ictproject",
+            "certificate_hash": "693fdaebe840bf3af1703ddc477b9fc9fc566c7f"
+          }
+        },
+        {
+          "client_id": "898545693773-vdvb1e48nufid8hbkoss3c8o95jm5950.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ictproject",
+            "certificate_hash": "e9a8138023fd343041df3959757f5c779862ebaa"
+          }
+        },
+        {
+          "client_id": "898545693773-b12715bnma4ou57ob4s94bmmt5smh4nt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuWEdcH5TgRJ4pRFosT1dzh6zBueBHfAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "898545693773-b12715bnma4ou57ob4s94bmmt5smh4nt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

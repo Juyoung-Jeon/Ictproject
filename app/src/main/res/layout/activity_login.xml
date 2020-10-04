@@ -144,7 +144,7 @@
             android:drawableLeft="@drawable/ic_facebook"
             android:drawablePadding="5dp"
             android:fontFamily="@font/bmjua_ttf"
-            android:text="페이스북 로그인" />
+            android:text="구글 로그인" />
     </LinearLayout>
 
     <LinearLayout
