@@ -11,6 +11,9 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="default_notification_channel_id">default_notification_channel_id</string>
+    <string name="facebook_app_id">337770790833544</string>
+    <string name="fb_login_protocol_scheme">fb337770790833544</string>
+
 
     <string-array name="spinner_age">
         <item>전체</item>

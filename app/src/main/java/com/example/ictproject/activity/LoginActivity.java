@@ -5,10 +5,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +22,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ictproject.R;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -25,18 +35,21 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.core.Tag;
 import com.kakao.auth.AuthType;
 import com.kakao.auth.Session;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
 
+
+import java.security.MessageDigest;
 
 import static com.example.ictproject.upload.Util.showToast;
 
@@ -51,6 +64,9 @@ public class LoginActivity extends AppCompatActivity {
     private SessionCallback sessionCallback = new SessionCallback();
 
     Session session;
+
+    //페이스북 로그인
+    private CallbackManager callbackManager;
 
     //구글 로그인
     private GoogleSignInClient mGoogleSignInClient;
@@ -71,6 +87,18 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
 
+//        해시키 확인 코드
+//        try {
+//            PackageInfo info = getPackageManager().getPackageInfo("com.example.ictproject", PackageManager.GET_SIGNATURES);
+//
+//            for (Signature signature : info.signatures) {
+//                MessageDigest md = MessageDigest.getInstance("SHA");
+//                md.update(signature.toByteArray());
+//                Log.d("해시키","KeyHash : " + Base64.encodeToString(md.digest(), Base64.DEFAULT));
+//            }
+//        }
+//        catch (Exception e) {}
+
         // 구글 로그인
         createRequest();
         findViewById(R.id.emailLogin).setOnClickListener(new View.OnClickListener() {
@@ -85,10 +113,33 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.password);
         Button loginButton = findViewById(R.id.loginButton);
         TextView register = findViewById(R.id.register);
-        Button kakaoLogin = findViewById(R.id.kakaoLogin);
+        LoginButton facebookLogin = findViewById(R.id.facebook_login);
         session = Session.getCurrentSession();
         session.addCallback(sessionCallback);
         checkBox = findViewById(R.id.save_Id);
+
+        // 페이스북 콜백 등록
+        callbackManager = CallbackManager.Factory.create();
+        facebookLogin.setReadPermissions("email", "public_profile");
+        facebookLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
+
+
 
         appData = getSharedPreferences("appData", MODE_PRIVATE);
         load();
@@ -114,13 +165,32 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        kakaoLogin.setOnClickListener(new View.OnClickListener() {
+//        kakaoLogin.setOnClickListener(new View.OnClickListener() {
+////            @Override
+////            public void onClick(View v) {
+////                session.open(AuthType.KAKAO_LOGIN_ALL, LoginActivity.this);
+////            }
+////        });
+    }
+
+    // 페이스북 로그인 이벤트
+    private void handleFacebookAccessToken(AccessToken accessToken) {
+        AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
-            public void onClick(View v) {
-                session.open(AuthType.KAKAO_LOGIN_ALL, LoginActivity.this);
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()){
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+
+                } else {
+                    Toast.makeText(LoginActivity.this, "로그인에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
+
 
     // 구글 로그인 요청
     private void createRequest() {
@@ -143,6 +213,9 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // 페이스북 콜백 등록
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
@@ -157,12 +230,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
 //            카카오 로그인
-        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            return;
-        }
+//        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//            finish();
+//            return;
+//        }
     }
 
     private void firebaseAuthWithGoogle(String idToken) {

@@ -125,16 +125,12 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/kakaoLogin"
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/facebook_login"
             android:layout_width="180dp"
             android:layout_height="50dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/round"
-            android:drawableLeft="@drawable/ic_iconfinder_kakao_talk2_289120"
-            android:drawablePadding="5dp"
             android:fontFamily="@font/bmjua_ttf"
-            android:text="카카오 로그인" />
+            android:layout_marginBottom="5dp"/>
 
         <Button
             android:id="@+id/emailLogin"
